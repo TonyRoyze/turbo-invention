@@ -1,0 +1,138 @@
+---
+import { ViewTransitions } from "astro:transitions";
+interface Props {
+    title: string;
+}
+
+const { title } = Astro.props;
+
+// Get current path to highlight active page
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <ViewTransitions />
+        <meta charset="UTF-8" />
+        <meta name="description" content="Astro description" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+    </head>
+    <body>
+        <nav class="navigation">
+            <div class="nav-container">
+                <a href="/" class={currentPath === "/" ? "active" : ""}>
+                    Page 1
+                </a>
+                <a
+                    href="/second"
+                    class={currentPath === "/second" ? "active" : ""}
+                >
+                    Page 2
+                </a>
+                <a
+                    href="/third"
+                    class={currentPath === "/third" ? "active" : ""}
+                >
+                    Page 3
+                </a>
+                <!-- <a
+                    href="/forth"
+                    class={currentPath === "/forth" ? "active" : ""}
+                >
+                    Page 4
+                </a> -->
+                <a
+                    href="/fifth"
+                    class={currentPath === "/fifth" ? "active" : ""}
+                >
+                    Page 5
+                </a>
+                <!-- <a
+                    href="/sixth"
+                    class={currentPath === "/sixth" ? "active" : ""}
+                >
+                    Page 6
+                </a> -->
+            </div>
+        </nav>
+        <slot />
+    </body>
+</html>
+<style is:global>
+    :root {
+        --accent: 136, 58, 234;
+        --accent-light: 224, 204, 250;
+        --accent-dark: 49, 10, 101;
+        --accent-gradient: linear-gradient(
+            45deg,
+            rgb(var(--accent)),
+            rgb(var(--accent-light)) 30%,
+            white 60%
+        );
+    }
+    html {
+        font-family: system-ui, sans-serif;
+        background: #13151a;
+        background-size: 224px;
+    }
+    code {
+        font-family:
+            Menlo,
+            Monaco,
+            Lucida Console,
+            Liberation Mono,
+            DejaVu Sans Mono,
+            Bitstream Vera Sans Mono,
+            Courier New,
+            monospace;
+    }
+
+    /* Navigation styles */
+    .navigation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(19, 21, 26, 0.8);
+        backdrop-filter: blur(10px);
+        z-index: 1000;
+        padding: 0.5rem 0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-container {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+    }
+
+    .navigation a {
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .navigation a:hover {
+        background: rgba(136, 58, 234, 0.2);
+    }
+
+    .navigation a.active {
+        background: rgb(136, 58, 234);
+        color: white;
+    }
+
+    /* Add padding to main content to account for fixed nav */
+    body {
+        padding-top: 3rem;
+        margin: 0;
+    }
+</style>
