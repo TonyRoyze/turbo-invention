@@ -14,6 +14,7 @@ export const GET: APIRoute = (data) => {
 		}),
 	);
 };
+// console.log(data);
 
 // No product found
 if (!data) {
@@ -27,50 +28,81 @@ const sortedData = [...data].sort(
 	(a, b) => parseInt(b.Score) - parseInt(a.Score),
 );
 
-// Function to create segments array for the progress bar
-function createSegments(score: number) {
-	const totalSegments = 10; // 10 segments for 100%
-	const filledSegments = Math.floor(score / (100 / totalSegments));
-	return Array(totalSegments)
-		.fill(0)
-		.map((_, i) => i < filledSegments);
+// Function to get badge color based on avenue name
+function getBadgeColor(avenue: string) {
+	if (!avenue) return "var(--border)";
+
+	// Create a simple hash of the avenue name to generate consistent colors
+	let hash = 0;
+	for (let i = 0; i < avenue.length; i++) {
+		hash = avenue.charCodeAt(i) + ((hash << 5) - hash);
+	}
+
+	// Use the hash to generate a hue value (0-360)
+	const hue = hash % 360;
+
+	// Return HSL color with fixed saturation and lightness
+	return `hsl(${hue}, 70%, 45%)`;
+}
+
+// Function to get first name only
+function getFirstName(fullName: string) {
+	return fullName.split(" ")[0];
+}
+// Function to get first word of project
+function getFirstProjectWord(project: string) {
+	if (!project) return "--";
+	return project.split(" ")[0];
 }
 ---
 
-<Layout title="Student Performance Dashboard">
+<Layout title="Leo Member Tracker">
 	<main>
-		<h1>Student Performance Dashboard</h1>
+		<h1>Leo Member Tracker</h1>
 		<div class="score-table">
 			<div class="table-header">
 				<div class="name-col">Student Name</div>
+				<div class="avenue-col">Avenue</div>
+				<div class="project-col">Project</div>
 				<div class="score-col">Score</div>
 			</div>
 			{
 				sortedData.map((item, index) => {
 					const score = parseInt(item.Score);
 					let rowClass = "table-row";
-					const segments = createSegments(score);
-
-					// Special treatment for top performers
+					const badgeColor = getBadgeColor(item.Avenue);
 					if (index === 0) rowClass += " first-place";
 					if (index === 1) rowClass += " second-place";
 					if (index === 2) rowClass += " third-place";
-
 					return (
 						<div class={rowClass}>
-							<div class="name-col">{item.Name}</div>
+							<div class="name-col">
+								<span class="full-name">{item.Name}</span>
+								<span class="first-name-only">
+									{getFirstName(item.Name)}
+								</span>
+							</div>
+							<div class="avenue-col">
+								{item.Avenue ? (
+									<span
+										class="avenue-badge"
+										style={`background-color: ${badgeColor}`}
+									>
+										{item.Avenue}
+									</span>
+								) : (
+									<span class="avenue-badge empty">N/A</span>
+								)}
+							</div>
+							<div class="project-col">
+								<span class="project-full">
+									{item.Project ? item.Project : "--"}
+								</span>
+								<span class="project-first-word">
+									{getFirstProjectWord(item.Project)}
+								</span>
+							</div>
 							<div class="score-col">
-								<div class="segmented-bar">
-									{segments.map((isFilled, i) => (
-										<div
-											class={`segment ${isFilled ? "filled" : ""} ${
-												index === 0
-													? "gold-segment"
-													: ""
-											}`}
-										/>
-									))}
-								</div>
 								<span class="score-text">{item.Score}</span>
 							</div>
 						</div>
@@ -160,23 +192,6 @@ function createSegments(score: number) {
 		position: relative;
 	}
 
-	/* .score-table::before {
-		content: "";
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: linear-gradient(
-			45deg,
-			transparent 40%,
-			rgba(26, 115, 231, 0.1) 45%,
-			rgba(26, 115, 231, 0.1) 55%,
-			transparent 60%
-		); 
-		pointer-events: none;
-	} */
-
 	.table-header {
 		display: flex;
 		background: var(--primary);
@@ -236,11 +251,67 @@ function createSegments(score: number) {
 		position: relative;
 	}
 
+	.first-name-only {
+		display: none;
+	}
+
+	.avenue-col,
+	.project-col {
+		flex: 1;
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-left: 1px dotted var(--border);
+		padding-left: 15px;
+	}
+
+	.score-text {
+		position: relative;
+		z-index: 1;
+		font-weight: 600;
+		color: var(--copy);
+		background: rgba(0, 0, 0, 0.15);
+		padding: 2px 8px;
+		border-radius: 3px;
+		border: none;
+	}
+
+	.avenue-badge {
+		display: inline-block;
+		padding: 4px 12px;
+		border-radius: 20px;
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: white;
+		text-align: center;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+		transition: all 0.2s ease;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 100%;
+	}
+
+	.avenue-badge.empty {
+		background-color: #333;
+		color: var(--copy-lighter);
+		opacity: 0.6;
+	}
+
+	.highlight .avenue-badge {
+		transform: scale(1.05);
+		box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+	}
+
 	.score-col {
 		flex: 1;
 		position: relative;
 		display: flex;
 		align-items: center;
+		justify-content: center;
 		border-left: 1px dotted var(--border);
 		padding-left: 15px;
 	}
@@ -306,21 +377,15 @@ function createSegments(score: number) {
 		box-shadow: 0 0 10px var(--secondary);
 	}
 
-	/* Removed the .first-place .name-col::before selector that was adding the star icon */
-
 	.second-place::before {
 		background: var(--primary-light);
 		box-shadow: 0 0 5px var(--primary-light);
 	}
 
-	/* Removed the .second-place .name-col::before selector that was adding the star icon */
-
 	.third-place::before {
 		background: var(--primary-dark);
 		box-shadow: 0 0 5px var(--primary-dark);
 	}
-
-	/* Removed the .third-place .name-col::before selector that was adding the star icon */
 
 	/* Hover effect */
 	.highlight {
@@ -358,6 +423,81 @@ function createSegments(score: number) {
 				10px 100%,
 				0% calc(100% - 10px)
 			);
+			font-size: 0.85rem;
+		}
+
+		/* Keep all columns visible but adjust their sizes */
+		.name-col {
+			flex: 1 0 40px;
+			min-width: 20px;
+			max-width: 50px;
+			overflow: hidden;
+		}
+		.full-name {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			display: block;
+			max-width: 100%;
+		}
+
+		.avenue-col {
+			flex: 1 0 40px;
+			min-width: 60px;
+			max-width: 80px;
+		}
+
+		.project-col {
+			flex: 1 0 40px;
+			min-width: 60px;
+			max-width: 80px;
+		}
+
+		.score-col {
+			flex: 0.5 0 40px;
+			min-width: 40px;
+			max-width: 50px;
+		}
+
+		/* Miniaturize badges on mobile */
+		.avenue-badge {
+			padding: 2px 8px;
+			font-size: 0.7rem;
+			letter-spacing: 0.3px;
+			max-width: 50px;
+		}
+
+		/* Adjust text display for better mobile viewing */
+		.table-row {
+			padding: 0.7rem 1rem;
+		}
+
+		.table-header {
+			padding: 0.8rem 1rem;
+		}
+
+		/* Remove the display:none properties to keep everything visible */
+		.full-name,
+		.project-full {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			display: block;
+			max-width: 100%;
+		}
+
+		.first-name-only,
+		.project-first-word {
+			display: none; /* Hide the shortened versions */
+		}
+		.project-full {
+			display: none;
+		}
+		.project-first-word {
+			display: inline;
+		}
+		.segmented-bar {
+			display: none;
 		}
 	}
 
@@ -367,4 +507,64 @@ function createSegments(score: number) {
 		margin: 0;
 		padding: 0;
 	}
+
+	.project-first-word {
+		display: none;
+	}
+
+	@media (max-width: 768px) {
+		.full-name {
+			display: none;
+		}
+		.first-name-only {
+			display: block;
+		}
+		.project-full {
+			display: none;
+		}
+		.project-first-word {
+			display: inline;
+		}
+		.segmented-bar {
+			display: none;
+		}
+	}
+}
+@media (max-width: 768px) {
+    /* Adjusted column sizes for better balance */
+    .name-col {
+        flex: 2 0 60px;
+        min-width: 50px;
+        max-width: 90px;
+        overflow: hidden;
+    }
+    .avenue-col {
+        flex: 1 0 50px;
+        min-width: 40px;
+        max-width: 70px;
+    }
+    .project-col {
+        flex: 0.5 0 60px;
+        min-width: 50px;
+        max-width: 90px;
+    }
+    .score-col {
+        flex: 0.7 0 40px;
+        min-width: 35px;
+        max-width: 50px;
+    }
+    .full-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: block;
+        max-width: 100%;
+    }
+    .avenue-badge {
+        padding: 2px 8px;
+        font-size: 0.7rem;
+        letter-spacing: 0.3px;
+        max-width: 70px;
+    }
+}
 </style>

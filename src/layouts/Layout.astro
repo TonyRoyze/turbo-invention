@@ -22,43 +22,6 @@ const currentPath = Astro.url.pathname;
         <title>{title}</title>
     </head>
     <body>
-        <nav class="navigation">
-            <div class="nav-container">
-                <a href="/" class={currentPath === "/" ? "active" : ""}>
-                    Page 1
-                </a>
-                <a
-                    href="/second"
-                    class={currentPath === "/second" ? "active" : ""}
-                >
-                    Page 2
-                </a>
-                <a
-                    href="/third"
-                    class={currentPath === "/third" ? "active" : ""}
-                >
-                    Page 3
-                </a>
-                <!-- <a
-                    href="/forth"
-                    class={currentPath === "/forth" ? "active" : ""}
-                >
-                    Page 4
-                </a> -->
-                <a
-                    href="/fifth"
-                    class={currentPath === "/fifth" ? "active" : ""}
-                >
-                    Page 5
-                </a>
-                <!-- <a
-                    href="/sixth"
-                    class={currentPath === "/sixth" ? "active" : ""}
-                >
-                    Page 6
-                </a> -->
-            </div>
-        </nav>
         <slot />
     </body>
 </html>
